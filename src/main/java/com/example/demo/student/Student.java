@@ -2,20 +2,20 @@ package com.example.demo.student;
 
 public class Student {
 
-    private final Integer studentId;
-    private final String studentName;
+    private final int id;
+    private final String name;
 
-    public Student(Integer studentId,
-                   String studentName) {
-        this.studentId = studentId;
-        this.studentName = studentName;
+    public Student(Integer id,
+                   String name) {
+        this.id = id;
+        this.name = name;
     }
 
-    public Integer getStudentId() {
-        return studentId;
+    public int getId() {
+        return id;
     }
 
     public String getStudentName() {
-        return studentName;
+        return name;
     }
 }
