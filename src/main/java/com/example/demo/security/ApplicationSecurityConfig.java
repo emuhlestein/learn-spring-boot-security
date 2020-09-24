@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import static com.example.demo.security.ApplicationUserPermission.COURSE_WRITE;
 import static com.example.demo.security.ApplicationUserRole.*;
@@ -29,20 +30,25 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        System.out.println("SUTDENT NAME: " + STUDENT.name());
+        System.out.println("STUDENT NAME: " + STUDENT.name());
          http
-                 .csrf().disable() // TODO: learn about later
-                .authorizeRequests() // authorize requests
-                .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
-                .antMatchers("/api/**").hasRole(STUDENT.name())
-                .antMatchers(HttpMethod.DELETE, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
-                .antMatchers(HttpMethod.POST, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
-                .antMatchers(HttpMethod.PUT, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
-                .antMatchers(HttpMethod.GET, "/admin/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
-                .anyRequest()
-                .authenticated() // any request must be authenticated (username and password)
-                .and()
-                .httpBasic(); // use basic authentication
+                 .csrf().disable()
+                 .authorizeRequests() // authorize requests
+                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
+                 .antMatchers("/api/**").hasRole(STUDENT.name())
+                 .antMatchers(HttpMethod.DELETE, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
+                 .antMatchers(HttpMethod.POST, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
+                 .antMatchers(HttpMethod.PUT, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
+                 .antMatchers(HttpMethod.GET, "/admin/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
+                 .anyRequest()
+                 .authenticated() // any request must be authenticated (username and password)
+                 .and()
+//                .httpBasic(); // use basic authentication
+                 .formLogin()
+                 .loginPage("/login").permitAll()
+                 .defaultSuccessUrl("/courses", true)
+                 .and()
+                 .rememberMe(); // default to  2 weeks
     }
 
     @Override
