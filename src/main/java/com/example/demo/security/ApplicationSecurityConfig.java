@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.example.demo.security.ApplicationUserPermission.COURSE_WRITE;
 import static com.example.demo.security.ApplicationUserRole.*;
 
@@ -27,6 +29,8 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     public ApplicationSecurityConfig(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
+
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -48,7 +52,16 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                  .loginPage("/login").permitAll()
                  .defaultSuccessUrl("/courses", true)
                  .and()
-                 .rememberMe(); // default to  2 weeks
+                 .rememberMe()
+                    .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21)) // default to  2 weeks
+                    .key("somethingverysecure")
+                 .and()
+                 .logout()
+                    .logoutUrl("/logout")
+                    .clearAuthentication(true)
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID", "remember-me")
+                    .logoutSuccessUrl("/login");
     }
 
     @Override
