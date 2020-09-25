@@ -1,6 +1,7 @@
 package com.example.demo.security;
 
 import com.example.demo.auth.ApplicationUserService;
+import com.example.demo.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,9 +11,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.concurrent.TimeUnit;
 
 import static com.example.demo.security.ApplicationUserPermission.COURSE_WRITE;
 import static com.example.demo.security.ApplicationUserRole.*;
@@ -31,13 +31,15 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         this.applicationUserService = applicationUserService;
     }
 
-
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         System.out.println("STUDENT NAME: " + STUDENT.name());
          http
                  .csrf().disable()
+                 .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                 .and()
+                 .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager()))
                  .authorizeRequests() // authorize requests
                  .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                  .antMatchers("/api/**").hasRole(STUDENT.name())
@@ -46,24 +48,26 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                  .antMatchers(HttpMethod.PUT, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
                  .antMatchers(HttpMethod.GET, "/admin/api/**").hasAnyRole(ADMIN.name(), ADMINTRAINEE.name())
                  .anyRequest()
-                 .authenticated() // any request must be authenticated (username and password)
-                 .and()
-//                .httpBasic(); // use basic authentication
-                 .formLogin()
-                    .loginPage("/login")
-                    .permitAll()
-                    .defaultSuccessUrl("/courses", true)
-                 .and()
-                 .rememberMe()
-                    .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21)) // default to  2 weeks
-                    .key("somethingverysecure")
-                 .and()
-                 .logout()
-                    .logoutUrl("/logout")
-                    .clearAuthentication(true)
-                    .invalidateHttpSession(true)
-                    .deleteCookies("JSESSIONID", "remember-me")
-                    .logoutSuccessUrl("/login");
+                 .authenticated(); // any request must be authenticated (username and password)
+
+        // form-based authentication
+//                 .and()
+////                .httpBasic(); // use basic authentication
+//                 .formLogin()
+//                    .loginPage("/login")
+//                    .permitAll()
+//                    .defaultSuccessUrl("/courses", true)
+//                 .and()
+//                 .rememberMe()
+//                    .tokenValiditySeconds((int)TimeUnit.DAYS.toSeconds(21)) // default to  2 weeks
+//                    .key("somethingverysecure")
+//                 .and()
+//                 .logout()
+//                    .logoutUrl("/logout")
+//                    .clearAuthentication(true)
+//                    .invalidateHttpSession(true)
+//                    .deleteCookies("JSESSIONID", "remember-me")
+//                    .logoutSuccessUrl("/login");
     }
 
     @Override
