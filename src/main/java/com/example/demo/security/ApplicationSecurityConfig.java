@@ -46,11 +46,12 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                  .csrf().disable()
                  .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                 .and().authorizeRequests().antMatchers("/api/v1/users*").permitAll()
                  .and()
                  .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey))
                  .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig), JwtUsernameAndPasswordAuthenticationFilter.class)
                  .authorizeRequests() // authorize requests
-                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
+                 .antMatchers("/", "index", "/css/*", "/js/*", "/api/v1/users/*").permitAll()
                  .antMatchers("/api/**").hasRole(STUDENT.name())
                  .antMatchers(HttpMethod.DELETE, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
                  .antMatchers(HttpMethod.POST, "/admin/api/**").hasAuthority(COURSE_WRITE.getPermission())
